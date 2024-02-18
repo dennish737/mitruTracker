@@ -1,0 +1,306 @@
+
+Install netstat
+sudo apt install net-tools
+
+get ip address and mac address
+Mac: 94:c6:91:a8:40:96 10.0.2.39
+MQTT
+sudo apt update -y && sudo apt install mosquitto mosquitto-clients -y
+sudo systemctl status mosquitto
+
+If mosquitto is not running start it: sudo systemctl start mosquitto
+
+sudo systemctl enable mosquitto
+
+Configure MQTT passwords
+sudo mosquitto_passwd -c /etc/mosquitto/passwd <user>
+enter password.
+
+Note this rewrites the /etc/mosquitto/passwd file. Before
+running the command copy the file, then run the command, then
+insert old data
+
+sudo mosquitto_passwd -c /etc/mosquitto/passwd MQTT_SnoCo
+SnoCoDEM
+sudo nano /etc/mosquitto/conf.d/default.conf
+
+allow_anonymous false
+password_file /etc/mosquitto/passwd
+
+use the following syntax:
+
+Publication: mosquitto_pub -h address -t topic -m "message" -u "username" -P "password"
+Subscription: mosquitto_sub -h address-t topic-u "usurname" -P "password"
+
+mosquitto_pub -h localhost -t "python/mqtt" -m "hellow world" -u "MQQT_Rules" -P "password"
+mosquitto_sub -h localhost -t "python/mqtt" -u "MQQT_Scrapper" -P "password"
+
+Instruction for installing Linux Apache MySql PHP (LAMP)
+
+Assumptions:
+	1) Linux 22.04 LTS Server is installed
+
+1) Update system: 
+	sudo apt update; sudo apt upgrade
+	
+2) Install apache2: 
+	sudo apt install -y apache2 apache2-utils
+	
+3) check that apache installed correctly
+	sudo systemctl status apache2
+	apache2 -v
+		Server version: Apache/2.4.52 (Ubuntu)
+		Server built:   2023-03-01T22:43:55
+	sudo a2enmod rewrite
+	sudo systemctl restart apache2
+	
+4) update the firewall
+	sudo ufw app list
+		Note we will use Apache Full for now. Will not be able to use SSL 
+		until certificate is installed
+	sudo ufw allow in "Apache Full"
+	sudo ufw allow ssh
+	
+5) check ufw status
+	sudo ufw status
+	If not enable:
+		sudo ufw enable
+		sudo ufw status
+	Make sure rules for apache full are enabled
+
+6) set up initial subdirectories for trailers, docs
+	sudo mkdir /var/www/trailers
+	sudo mkdir /var/www/docs
+	
+7) Set apache as owner for data directories
+	sudo chown www-data:www-data /var/www/ -R
+
+8) check apache2 default page is working
+	From anotehr system, in the browser: http://<your_server_ip>
+
+
+Install MariaDB	
+9) sudo apt install -y mariadb-server mariadb-client libmariadb-dev
+	
+10) Check status of mariadb
+	systemctl status mariadb
+	If not started start it:
+		sudo systemctl start mariadb
+		
+11) enable mariadb to start at boot
+		sudo systemctl enable mariadb
+12) check the version
+	mariadb --version
+		mariadb  Ver 15.1 Distrib 10.6.12-MariaDB, for debian-linux-gnu (x86_64) using  EditLine wrapper
+
+13) run the post install security script
+		sudo mysql_secure_installation
+			current password <return>
+			Switch to unix_socket authentication [Y/n] Y
+			Change the root password? [Y/n] Y
+				new Password: SnoCoDEM  password
+				Re-enter new password: SnoCoDEM  password
+			Answer remaining questions using defalut by hitting return
+
+Install PHP
+14) sudo apt install php libapache2-mod-php php-mysql
+
+15) Modify apache2 files
+	sudo nano /etc/apache2/mods-enabled/dir.conf
+		add index.php before index.html
+
+16) Add optional PHP Modules
+		a) List modules
+			apt-cache search php- | less
+		b) Identify version - at the time of this document verson was 8.1
+		c) Load modules
+		sudo apt install  php-common php8.1-cli php8.1-common php-json php8.1-opcache php8.1-readline php8.1-tidy
+		sudo apt install php-bcmath php-bz2 php-intl php-gd php-mbstring php-zip 
+		sudo apt install php-intl php-tokenizer php-curl php-ldap
+		
+17) Install Composer
+	sudo curl -sS https://getcomposer.org/installer | php
+	sudo mv composer.phar /usr/local/bin/composer
+	
+18)Enable PHP and Restart Apache
+	sudo a2enmod php8.1
+	sudo systemctl restart apache2
+
+19) Test PHP - note SNIPE uses PHP
+		sudo nano /var/www/doc/info.php
+		<?php phpinfo(); ?>
+		CTRL o , return ,CTRL x
+PHP-FPM
+1) Disable php8.1
+		sudo a2dismod php8.1
+
+2) Install php-fpm
+	sudo apt install php8.1-fpm
+
+3) enable proxy_fcgi and setenvif
+	sudo a2enmod proxy_fcgi setenvif
+
+4) enable config file /etc/apache2/conf-available/php8.1-fpm.conf
+	sudo a2enconf php8.1-fpm
+
+5) restart apache
+		sudo systemctl restart apache2
+-----		
+Snipe-IT
+1) wget https://raw.githubusercontent.com/snipe/snipe-it/master/install.sh
+
+2) chmod 777 install.sh
+
+3) ./install.sh
+
+4) Answer Questions
+	FQDN = utils.local
+	Auto create snipe user password - n
+	SnoCoDEM
+	
+
+5) set permissions
+	sudo chown -R www-data:www-data /var/www/html/snipeit
+	sudo chmod -R 755 /var/www/html/snipeit
+	
+6) remove 
+	sudo nano /var/www/html/snipeit/.env
+	Note: we are going to set APP_URL to ''. When snipeit runs
+		  it will tell you what to put in there.
+	APP_URL=
+	
+	CTRL o , return ,CTRL x
+	
+7 Virtual host
+
+		sudo a2ensite snipeit.conf
+		apachectl configtest  -> checks the apache2 config files 
+		sudo systemctl restart apache2
+		
+
+
+  Alias /docs "/var/www/docs"
+  <Directory /var/www/docs>
+     Options Indexes FollowSymLinks MultiViews
+     AllowOverride None
+     Order allow,deny
+     allow from all
+  </Directory>
+
+  Alias /docs "/var/www/trailers"
+  <Directory /var/www/trailers>
+     Options Indexes FollowSymLinks MultiViews
+     AllowOverride None
+     Order allow,deny
+     allow from all
+  </Directory>
+
+
+
+disable site sudo a2dissite <name>.conf
+enable site sudo a2ensite <name>.conf
+List of sites: apache2ctl -S
+Misc
+View apache access logs
+sudo tail -100 /var/log/apache2/access.log
+
+
+Build tools
+sudo apt-get install build-essential git
+cd ~
+node-red
+sudo apt update
+sudo apt install -y nodejs 
+node -v
+12-22-9
+
+sudo apt install -y npm
+
+cd ~
+curl -sL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh
+
+sudo bash nodesource_setup.sh
+sudo apt install nodejs
+node -v
+12-22-9
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+source ~/.bashrc
+
+nvm list-remote
+
+nvm install v18.16.0
+
+nvm list
+
+node -v
+18.16.0
+
+npm install -g --unsafe-perm node-red
+npm install -g --unsafe-perm node-red-admin
+
+sudo ufw allow 1880
+
+
+npm install -g pm2
+
+sudo nano /etc/systemd/system/node-red.service
+
+[Unit]
+Description=Node-RED
+After=syslog.target network.target
+ 
+[Service]
+ExecStart=/usr/local/bin/node-red-pi --max-old-space-size=128 -v
+Restart=on-failure
+KillSignal=SIGINT
+ 
+# log output to syslog as ‘node-red’
+SyslogIdentifier=node-red
+StandardOutput=syslog
+ 
+# non-root user to run as
+WorkingDirectory=/home/sammy/
+User=sammy
+Group=sammy
+ 
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl start node-red
+
+node-red-admin hash-pw
+password -> password
+$2b$08$oQ0eEkJ/pXuwcwO0vLqYj.kjNKet9J8ZXdMlvbPz.kcE2XnaLCozq
+copy the hash value and pasting it in the node-red settings
+
+nano /home/wa7dem/.node-red/settings.js
+password: "$2b$08$oQ0eEkJ/pXuwcwO0vLqYj.kjNKet9J8ZXdMlvbPz.kcE2XnaLCozq"
+
+MariaDB remote access
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+change bind-address to 0.0.0.0
+systemctl restart mariadb
+sudo netstat -tulnp | grep mariadb
+sudo ufw allow 3306/tcp
+
+Python
+sudo apt update
+sudo apt install python3-pip
+sudo apt install build-essential libssl-dev libffi-dev python3-dev
+
+sudo pip3 install numpy pandas bs4 mariadb
+pip3 install matplotlib
+
+USB DRIVE - ntfs file system
+sudo apt-get install ntfs-3g
+
+sudo fdisk -l | grep NTFS
+sudo mkdir /media/usb
+sudo mount -t ntfs-3g /dev/sdb1 /media/usb
+
+sudo umount /media/usb
+
+
+Crontab
+*/15 * * * * /usr/bin/python3 /home/wa7dem/TrailerAlert.py

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+function getVehicleName(str) {
+
+        var v_name = "";
+        if (str == "1") {
+                v_name = "White" ;
+        } else if (str == "2") {
+                v_name = "Grey";
+        } else if (str == "3") {
+                v_name = "Black";
+        } else {
+                v_name = "Unknown";
+        }
+        return v_name;
+};
+
+var vehicle = "0";
+
+const queryString = window.location.search;
+
+const urlParams = new URLSearchParams(queryString);
+
+if (urlParams.has('vehicle')) {
+        vehicle = urlParams.get('vehicle');
+} else {
+        vehicle = "1";
+}
+
+let vehicleName = getVehicleName(vehicle);
+</script>
+
+<head>
+  <meta http-equiv="refresh" content="300">
+  <meta charset="UTF-8">
+  <title>MITRU Information</title>
+  <meta name="description" content="website description" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
+  <!-- CSS FOR STYLING THE PAGE  -->
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial scale=1.0">
+
+</head>
+
+<body>
+
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <!-- class="logo_colour", allows you to change the colour of the text -->
+        <h1><a href="vehicle_charts.html">SnoDEM<span class="logo_colour">_MITRU</span></a></h1>
+       
+      <script>
+        var hdr = '<h2> Vehicle Charts for ' + vehicleName + ' Information for past 72 hours </h2>';
+        document.write(hdr);
+        var datetime = new Date();
+        var hdr1 = '<h2> Current time: ' + datetime.toString() + ' </h2>';
+        //var hdr2 = '<h2> UTC Time    : ' + datetime.toUTCString() + ' </h2>';
+        document.write(hdr1);
+        //document.write(hdr2);
+      </script>   
+      </div> 
+      <div id="menubar">
+        <ul id="menu">
+          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
+          <li><a href="index.php">Home</a></li>
+          <li><a href="vehicles.php">Vehicles</a></li>
+          <li><a href="alertsandalarms.php">Alerts and Alarms</a></li>
+          <li><a href="rules.php">Rules</a></li>
+          <li><a href="contacts.php">Alert/Alarm Contacts</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+     </div>
+   </div>
+    <div id="site_content">
+      <div id="content">
+
+     <div id="flex">
+          <div id="myPlot1" style="width:100%;max-width:500px;float: left;"></div>
+
+          <div id="myPlot2" style="width:100%;max-width:500px;float: right;"></div>
+
+          <div id="container" style="width:100%;max-width:500px;float: left"></div>  
+
+         <div id="alarms" style="width:100%;max-width:500px;float: right;"></div>
+    </div>
+<script>
+
+var xValues = [];
+var vValues = [];
+var tValues = [];
+
+function convert(data) {
+         // Get the container element where the table will be inserted
+         let container = document.getElementById("container");
+         
+         // Create the table element
+         let table = document.createElement("table");
+         
+         // Get the keys (column names) of the first object in the JSON data
+         let cols = ['v_id', 'last_reading', 't_diff', 'volts', 'temp' ];
+         
+         // Create the header element
+         let thead = document.createElement("thead");
+         let tr = document.createElement("tr");
+         
+         // Loop through the column names and create header cells
+         cols.forEach((item) => {
+            let th = document.createElement("th");
+            th.innerText = item; // Set the column name as the text of the header cell
+            tr.appendChild(th); // Append the header cell to the header row
+         });
+         thead.appendChild(tr); // Append the header row to the header
+         table.append(tr) // Append the header to the table
+         
+         // Loop through the JSON data and create table rows
+         data.forEach((item) => {
+            let tr = document.createElement("tr");
+            
+            // Get the values of the current object in the JSON data
+            let vals = Object.values(item);
+            
+            // Loop through the values and create table cells
+            vals.forEach((elem) => {
+               let td = document.createElement("td");
+               td.innerText = elem; // Set the value as the text of the table cell
+               tr.appendChild(td); // Append the table cell to the table row
+            });
+            table.appendChild(tr); // Append the table row to the table
+         });
+         container.appendChild(table) // Append the table to the container element
+
+};
+
+var xmlhttp = new XMLHttpRequest();
+xmlhttp.onload = function() {
+  let jdata = this.responseText;
+  myObj = JSON.parse(jdata);
+  let text = ""
+  for (let x in myObj) {
+    xValues.push( myObj[x].t_diff/60.0);
+    vValues.push(myObj[x].volts);
+    tValues.push(myObj[x].temp);
+  }
+  //for(let x in xValues) {
+  //  text += xValues[x] + ", " + vValues[x] + ", " + tValues[x] + "<br>";
+  //}
+  //document.getElementById("demo").innerHTML = text;
+
+  var data1= [{
+        x: xValues,
+        y: vValues,
+        //mode: "markers",
+        //type: "scatter"
+        mode: "line"
+  }];
+
+  var layout1 = {
+    xaxis: {range: [0, 72], title: "Time in Hours"},
+    yaxis: {range: [6, 15], title: "Battery Voltage"},
+    title: "Vehicle Voltage for last 72 hours"
+        };
+
+  var data2 = [{
+        x: xValues,
+        y: tValues,
+        //mode: "markers",
+        //type: "scatter"
+        mode: "line"
+  }];
+
+  var layout2 = {
+    xaxis: {range: [0, 72], title: "Time in Hours"},
+    yaxis: {range: [30, 115], title: "Temperature \u00B0F"},
+    title: "Vehicle Temperature for last 72 hours"
+        };
+		
+
+  // Display using Plotly
+  Plotly.newPlot("myPlot1", data1, layout1);
+  Plotly.newPlot("myPlot2", data2, layout2);
+  convert(myObj);
+};
+xmlhttp.open("GET", "src/volt_temp_data.php?vehicle=" + vehicle, true);
+xmlhttp.send();
+//convert(myObj);
+
+//for(let x in xValues) {
+//    text += xValues[x] + ", " + vValues[x] + ", " + tValues[x] + "<br>";
+//}
+//document.getElementById("demo").innerHTML = text;
+</script>
+
+     </div>
+    </div>
+    <div id="footer">    
+      <p><a href="index.html">Home</a> | <a href="vehicles.php">Vehicles</a> | <a href="alertsandalarms.php">Alerts and Alarms</a>
+      | <a href="rules.php">Rules</a>
+      | <a href="contacts.php">Alert/Alarm Contacts</a> | <a href="contact.html">Contact Us</a></p>
+      <p>Copyright &copy; Snohomish County Department of Emergency Management </p>
+    </div>
+  <div>
+</body>
+</html> 
+

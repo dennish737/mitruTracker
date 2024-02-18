@@ -1,0 +1,13 @@
+To set up this solution, we need to install postfix mailutils. In Ubuntu we can do this as follows:
+sudo apt-get update
+sudo apt-get install postfix mailutils
+
+A simple implementation is shown in scripts/dbAuto_backup
+
+Cron allows you to schedule this script to run regularly. In order to facilitate this, do as follows:
+sudo crontab -e
+
+Then, add the script path to the end of the string
+30 22 * * * /home/user/script/mysql_backup.sh
+
+Thereafter, your script will be executed every day at 10:30 PM.

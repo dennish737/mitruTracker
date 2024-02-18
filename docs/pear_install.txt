@@ -1,0 +1,9 @@
+## install pear.php
+sudo apt install php-pear
+
+# recommend a reboot after install
+
+sudo pear install MDB2-beta MDB2_Driver_mysqli-beta
+sudo pear list | grep MDB2
+
+

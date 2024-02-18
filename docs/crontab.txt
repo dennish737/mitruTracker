@@ -1,0 +1,11 @@
+
+# First crontab entry
+contab -e
+select editor
+Add next line (cut and paste)
+*/15 * * * * /usr/bin/python3 /home/wa7dem/TrailerAlert.py
+
+# Add additonal items
+(crontab -l ; echo "*/15 * * * * /usr/bin/python3 /home/wa7dem/Rules.py")| crontab -
+(crontab -l ; echo "*/5 * * * * /usr/bin/python3 /home/wa7dem/alerts.py")| crontab -
+(crontab -l ; echo "*/15 * * * * /usr/bin/python3 /home/wa7dem/TrailerAlert.py")| crontab -
