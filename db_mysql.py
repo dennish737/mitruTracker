@@ -204,11 +204,11 @@ def update_contact(connection, v_id, dt):
         if cursor is not None:
             cursor.close()
 
-def update_move_status(connection, v_id, moving):
+def update_move_status(connection, v_id, moveing):
     # time is the time in minutes since last contact
     # note we overwrite time values
 
-    sql = "UPDATE move_status SET `moveing`={0} WHERE v_id={1};".format(int(moving), v_id)
+    sql = "UPDATE move_status SET moveing={0} WHERE v_id={1};".format(int(moveing), v_id)
     print(sql)
     cursor = connection.cursor()
     try:
@@ -393,7 +393,7 @@ def get_contacts(connection, severity, v_id):
     contacts = read_query(connection, query, data)
     return contacts
 
-def get_moving_status(connection, v_id):
+def get_moveing_status(connection, v_id):
     data = None
     query = """WITH move AS (
             SELECT v_id, speed,
@@ -402,20 +402,20 @@ def get_moving_status(connection, v_id):
                 COALESCE(LAG(speed, 2)
                     OVER (PARTITION BY v_id ORDER BY id DESC),0)AS speed2
             FROM motion
-            ), is_moving AS (
+            ), is_moveing AS (
             SELECT v_id, 
                 CASE 
                     WHEN speed = 0 and speed1 = 0 and speed2 = 0 THEN 0
                     -- WHEN speed > 0 or speed1 > 0 or speed2 > 0 THEN 1
                     WHEN speed > 0  THEN 1
                     -- ELSE 0
-                END as moving
+                END as moveing
             FROM move
             )
-            SELECT moving FROM is_moving 
+            SELECT moveing FROM is_moveing 
             WHERE  v_id = {1}
             LIMIT 1;
         """.format(v_id)
 
-    moving_status = read_query(connection, query, data)
-    return moving_status
+    moveing_status = read_query(connection, query, data)
+    return moveing_status
