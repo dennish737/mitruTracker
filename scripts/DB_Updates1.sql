@@ -13,10 +13,10 @@ CREATE TABLE IF NOT EXISTS motion (
 CREATE TABLE IF NOT EXISTS move_status (
    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
    v_id int NOT NULL,
-   moving tinyint DEFAULT 0
+   moveing tinyint DEFAULT 0
   );
 
- INSERT INTO move_status (v_id, moving)
+ INSERT INTO move_status (v_id, moveing)
     VALUES (1, 0), (2, 0), (3, 0);
    
   
@@ -70,17 +70,17 @@ WITH move AS (
     COALESCE(LAG(speed, 2)
     	OVER (PARTITION BY v_id ORDER BY id DESC),0)AS speed2
 FROM motion
-), is_moving AS (
+), is_moveing AS (
 SELECT v_id, 
 	CASE 
 		WHEN speed = 0 and speed1 = 0 and speed2 = 0 THEN 0
 		-- WHEN speed > 0 or speed1 > 0 or speed2 > 0 THEN 1
 		WHEN speed > 0  THEN 1
 		-- ELSE 0
-	END as moving
+	END as moveing
 FROM move
 )
-SELECT moving FROM is_moving 
+SELECT moveing FROM is_moveing
 WHERE  v_id = 2
 LIMIT 1; -- 45
  
