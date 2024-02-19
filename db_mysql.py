@@ -204,13 +204,12 @@ def update_contact(connection, v_id, dt):
         if cursor is not None:
             cursor.close()
 
-def update_move_status(connection, v_id, moveing):
+def update_move_status(connection, v_id, moving):
     # time is the time in minutes since last contact
     # note we overwrite time values
 
     sql = "UPDATE move_status SET `moving`={0} WHERE v_id={1};".format(int(moving), v_id)
 
-    print(sql)
     cursor = connection.cursor()
     try:
         cursor.execute( sql )
