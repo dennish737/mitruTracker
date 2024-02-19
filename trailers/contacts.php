@@ -1,6 +1,6 @@
 <!-- PHP code read contact table and dispaly it a s table -->
 <?php
-require_once "config.php"
+require_once('config.php');
 
 function vehicle_list($vehicles)
 {

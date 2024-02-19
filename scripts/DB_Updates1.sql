@@ -56,7 +56,7 @@ select id, v_id,
 	CASE 
 		WHEN speed > 1 THEN 1 
 		ELSE 0 
-	END AS moveing
+	END AS moving
 FROM motion
 WHERE speed > 1 and v_id = 2
 ORDER BY id;

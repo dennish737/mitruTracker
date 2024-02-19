@@ -208,7 +208,7 @@ def update_move_status(connection, v_id, moving):
     # time is the time in minutes since last contact
     # note we overwrite time values
 
-    sql = "UPDATE move_status SET `moveing`={0} WHERE v_id={1};".format(int(moving), v_id)
+    sql = "UPDATE move_status SET `moving`={0} WHERE v_id={1};".format(int(moving), v_id)
     print(sql)
     cursor = connection.cursor()
     try:
