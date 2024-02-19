@@ -1,6 +1,6 @@
 <!-- PHP code to establish connection with the localserver -->
 <?php
-require_once "config.php"
+require_once('config.php');
 function getDistanceBetweenPointsNew($latitude1, $longitude1, $latitude2, $longitude2, $unit = 'miles') {
   $theta = $longitude1 - $longitude2; 
   $distance = (sin(deg2rad($latitude1)) * sin(deg2rad($latitude2))) + (cos(deg2rad($latitude1)) * cos(deg2rad($latitude2)) * cos(deg2rad($theta))); 

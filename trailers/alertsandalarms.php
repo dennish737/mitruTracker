@@ -11,7 +11,7 @@ function getColVal($row, $column)
         return $rtn;
 }
 
-require_once "dbconfig.php";
+require_once('dbconfig.php');
 
 ?>
 

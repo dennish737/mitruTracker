@@ -1,5 +1,5 @@
 <?php
-require_once "config.php"
+require_once('config.php');
 
 function valid_phone($phone){
         $valid_number = filter_var($phone, FILTER_SANITIZE_NUMBER_INT);
@@ -9,7 +9,7 @@ function valid_phone($phone){
 $status = "";
 //////// Do not Edit below /////////
 try {
-$dbo = new PDO('mysql:host='.DB_SERVER.';dbname='.DB_NAME, DB_USER, DB_PASSWORD);
+$dbo = new PDO('mysql:host='.DB_SERVER.';dbname='.DB_NAME, DB_USERNAME, DB_PASSWORD);
 } catch (PDOException $e) {
 print "Error!: " . $e->getMessage() . "<br/>";
 die();
