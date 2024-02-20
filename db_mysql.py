@@ -79,7 +79,7 @@ def get_last_readings(connection, v_id):
                         WHERE l.v_id = %s GROUP BY v_id) as t
                     ON t.v_id = a.v_id AND
                         t.max_reading = a.last_reading;"""
-        data = (v_id,)
+        data = (str(v_id),)
         readings = read_query(connection, query, data)
 
     except database.Error as e:
